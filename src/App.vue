@@ -1,5 +1,6 @@
 <template>
   <h1>乐高标准模版</h1>
+  <a-button type="primary">test</a-button>
   <ul>
     <li>开箱即用</li>
     <li>typescript</li>
