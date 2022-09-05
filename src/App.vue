@@ -1,25 +1,19 @@
 <template>
-  <h1>乐高标准模版</h1>
-  <a-button type="primary">test</a-button>
-  <ul>
-    <li>开箱即用</li>
-    <li>typescript</li>
-    <li>Vue3</li>
-    <li>支持 tsx</li>
-    <li>eslint</li>
-    <li>简单易用可扩展</li>
-  </ul>
-  <hello-world />
+  <template-detail />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import Home from './views/Home.vue'
+import Editor from './views/Editor.vue'
+import TemplateDetail from './views/TemplateDetail.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
-    HelloWorld,
+    // Home,
+    // Editor,
+    TemplateDetail,
   },
 });
 </script>
