@@ -1,20 +1,26 @@
 <template>
-  <template-detail />
+  <div class="homepage-container">
+    <a-layout :style="{background: '#fff'}">
+      <a-layout-header class="header">
+        <div class="page-title">
+          慕课乐高
+        </div>
+      </a-layout-header>
+      <a-layout-content class="home-layout">
+        <router-view />
+      </a-layout-content>
+      <a-layout-footer>
+        © 慕课网（imooc.com）版权所有 | 津ICP备20000929号-2
+      </a-layout-footer>
+    </a-layout>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Home from './views/Home.vue'
-import Editor from './views/Editor.vue'
-import TemplateDetail from './views/TemplateDetail.vue'
 
 export default defineComponent({
   name: 'App',
-  components: {
-    // Home,
-    // Editor,
-    TemplateDetail,
-  },
 });
 </script>
 
@@ -26,5 +32,16 @@ export default defineComponent({
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.page-title {
+  color: #fff;
+}
+.content-container {
+  background: #fff;
+  padding: 0 24px 24px 30px;
+  min-height: 85vh;
+  max-width: 1200px;
+  margin: 50px auto;
+  width: 100%;
 }
 </style>
