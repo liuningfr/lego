@@ -1,12 +1,5 @@
 <template>
   <div class="editor" id="editor-layout-main">
-    <a-layout :style="{ background: '#fff' }">
-      <a-layout-header class="header">
-        <div class="page-title" :style="{ color: '#fff' }">
-          慕课乐高
-        </div>
-      </a-layout-header>
-    </a-layout>
     <a-layout>
       <a-layout-sider width="300" style="background: yellow">
         <div class="sidebar-container">

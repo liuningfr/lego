@@ -3,7 +3,7 @@
     <a-layout :style="{background: '#fff'}">
       <a-layout-header class="header">
         <div class="page-title">
-          慕课乐高
+          <router-link to="/">慕课乐高</router-link>
         </div>
       </a-layout-header>
       <a-layout-content class="home-layout">
@@ -25,14 +25,6 @@ export default defineComponent({
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 .page-title {
   color: #fff;
 }
