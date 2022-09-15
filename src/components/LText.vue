@@ -6,25 +6,22 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { pick } from 'lodash-es'
+import { transformToComponentProps, textDefaultProps, textStylePropNames } from '../defaultProps'
+const defaultProps = transformToComponentProps(textDefaultProps)
 // array that contains style props
 export default defineComponent({
   name: 'l-text',
   props: {
-    text: {
-      type: String,
-    },
-    fontSize: {
-      type: String,
-    },
     tag: {
       type: String,
       default: 'div'
-    }
+    },
+    ...defaultProps
   },
   setup (props) {
     // 重用并且简化
     // 抽离并且获得 styleProps
-    const styleProps = computed(() => pick(props, ['fontSize']))
+    const styleProps = computed(() => pick(props, textStylePropNames))
     return {
        styleProps
     }
@@ -43,5 +40,6 @@ button.l-text-component {
 .l-text-component {
   box-sizing: border-box;
   white-space: pre-wrap;
+  position: relative !important;
 }
 </style>
