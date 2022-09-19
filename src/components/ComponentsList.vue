@@ -7,12 +7,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import LText from '../components/LText.vue'
 export default defineComponent({
   props: {
     list: {
-      type: Array,
+      type: Array as PropType<any>,
       required: true
     }
   },
