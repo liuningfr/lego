@@ -1,9 +1,10 @@
 <template>
   <div class="editor" id="editor-layout-main">
     <a-layout>
-      <a-layout-sider width="300" style="background: yellow">
+      <a-layout-sider width="300" style="background: #fff">
         <div class="sidebar-container">
           组件列表
+          <components-list :list="defaultTextTemplates" @onItemClick="addItem"/>
         </div>
       </a-layout-sider>
       <a-layout style="padding: 0 24px 24px">
@@ -31,16 +32,26 @@
   import { useStore } from 'vuex'
   import { GlobalDataProps } from '../store/index'
   import LText from '../components/LText.vue'
+  import ComponentsList from '@/components/ComponentsList.vue'
+  import { defaultTextTemplates } from '@/defaultTemplates'
   
   export default defineComponent({
     components: {
-      LText
+      LText,
+      ComponentsList
     },
     setup() {
       const store = useStore<GlobalDataProps>()
       const components = computed(() => store.state.editor.components)
+
+      const addItem = (props: any) => {
+        store.commit('addComponent', props)
+      }
+
       return {
-        components
+        components,
+        defaultTextTemplates,
+        addItem,
       }
     }
   })
