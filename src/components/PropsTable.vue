@@ -19,7 +19,7 @@ export default defineComponent({
   name: 'props-table',
   props: {
     props: {
-      type: Object as PropType<TextComponentProps>,
+      type: Object as PropType<Partial<TextComponentProps>>,
       required: true
     }
   },
