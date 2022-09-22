@@ -31,6 +31,7 @@
         <props-table 
           v-if="currentElement && currentElement.props"
           :props="currentElement.props"
+          @change="handleChange"
         ></props-table>
       </a-layout-sider>  
     </a-layout>
@@ -68,12 +69,17 @@
         store.commit('setActive', id)
       }
 
+      const handleChange = (e: any) => {
+        console.log('event', e)
+      } 
+
       return {
         components,
         defaultTextTemplates,
         currentElement,
         addItem,
         setActive,
+        handleChange,
       }
     }
   })
