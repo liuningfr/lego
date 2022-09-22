@@ -7,7 +7,7 @@
     >
       <span class="label" v-if="value.text">{{value.text}}</span>
       <div class="prop-component">
-        <component :is="value.component" :value="value.value" v-bind="value.extraProps">
+        <component :is="value.component" :[value.valueProp]="value.value" v-bind="value.extraProps">
           <template v-if="value.options">
             <component
               :is="value.subComponent"
@@ -43,6 +43,7 @@ export default defineComponent({
         const item = mapPropsToForms[newKey]
         if (item) {
           item.value = item.initalTransform ? item.initalTransform(value) : value
+          item.valueProp = item.valueProp ? item.valueProp : 'value'
           result[newKey] = item
         }
         return result
