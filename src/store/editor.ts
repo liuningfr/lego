@@ -19,9 +19,9 @@ export interface ComponentData {
 }
 
 export const testComponents: ComponentData[] = [
-  { id: uuidv4(), name: 'l-text', props: { text: 'hello', fontSize: '10px', 'lineHeight': '1' }},
-  { id: uuidv4(), name: 'l-text', props: { text: 'hello2', fontSize: '20px', color: 'red', 'lineHeight': '2' }},
-  { id: uuidv4(), name: 'l-text', props: { text: 'hello3', fontSize: '30px', fontWeight: 'bold', actionType: 'url', url: 'https://www.baidu.com', 'lineHeight': '3' }}
+  { id: uuidv4(), name: 'l-text', props: { text: 'hello', fontSize: '10px', 'lineHeight': '1', textAlign: 'left', fontFamily: '' }},
+  { id: uuidv4(), name: 'l-text', props: { text: 'hello2', fontSize: '20px', color: 'red', 'lineHeight': '2', textAlign: 'left', fontFamily: '' }},
+  { id: uuidv4(), name: 'l-text', props: { text: 'hello3', fontSize: '30px', fontWeight: 'bold', actionType: 'url', url: 'https://www.baidu.com', 'lineHeight': '3', textAlign: 'left', fontFamily: '' }}
 ]
 
 const editor: Module<EditorProps, GlobalDataProps> = {
