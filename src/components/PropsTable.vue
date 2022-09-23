@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from 'vue'
+import { computed, defineComponent, PropType, VNode } from 'vue'
 import { reduce } from 'lodash'
 import { mapPropsToForms } from '../propsMap'
 import { TextComponentProps } from '../defaultProps'
@@ -40,7 +40,7 @@ interface FormProps {
   value: string;
   extraProps?: { [key: string]: any };
   text?: string;
-  options?: { text: string; value: any }[];
+  options?: { text: string | VNode; value: any }[];
   valueProp: string;
   eventName: string;
   events: { [key: string]: (e: any) => void };
