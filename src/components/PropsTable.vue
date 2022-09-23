@@ -31,7 +31,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue'
 import { reduce } from 'lodash'
-import { PropsToForms, mapPropsToForms } from '../propsMap'
+import { mapPropsToForms } from '../propsMap'
 import { TextComponentProps } from '../defaultProps'
 
 interface FormProps {
@@ -61,14 +61,14 @@ export default defineComponent({
         const newKey = key as keyof TextComponentProps
         const item = mapPropsToForms[newKey]
         if (item) {
-          const { valueProp = 'value', eventName = 'change', initalTransform } = item
+          const { valueProp = 'value', eventName = 'change', initalTransform, afterTransform } = item
           const newItem: FormProps = {
             ...item,
             value: initalTransform ? initalTransform(value) : value,
             valueProp,
             eventName,
             events: {
-              [eventName]: (e: any) => { context.emit('change', { key, value: e })}
+              [eventName]: (e: any) => { context.emit('change', { key, value: afterTransform? afterTransform(e) : e })}
             }
           }
           result[newKey] = newItem

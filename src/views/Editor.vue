@@ -70,7 +70,7 @@
       }
 
       const handleChange = (e: any) => {
-        console.log('event', e)
+        store.commit('updateComponent', e)
       } 
 
       return {
