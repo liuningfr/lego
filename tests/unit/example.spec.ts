@@ -2,7 +2,11 @@ import { shallowMount } from '@vue/test-utils'
 import HelloWorld from '@/components/HelloWorld.vue'
 import Hello from '@/components/Hello.vue'
 import TemplateList from '@/components/TemplateList.vue'
+import axios from 'axios'
+import flushPromises from 'flush-promises'
 
+jest.mock('axios')
+const mockAxios = axios as jest.Mocked<typeof axios>
 describe('HelloWorld.vue', () => {
   it('renders props.msg when passed', () => {
     const msg = 'new message'
@@ -36,5 +40,30 @@ describe('HelloWorld.vue', () => {
     if (events && events.length > 0) {
       expect(events[0]).toEqual([todoContent])
     }
+  })
+  it.only('should load user message when click the load button', async () => {
+    const msg = 'new message'
+    const wrapper = shallowMount(HelloWorld, {
+      props: { msg }
+    })
+    mockAxios.get.mockResolvedValueOnce({ data: { username: 'viking'}})
+    await wrapper.get('.loadUser').trigger('click')
+    expect(mockAxios.get).toHaveBeenCalled()
+    expect(wrapper.find('.loading').exists()).toBeTruthy()
+    await flushPromises()
+    // 界面更新完毕
+    expect(wrapper.find('.loading').exists()).toBeFalsy()
+    expect(wrapper.get('.userName').text()).toBe('viking')
+  })
+  it.only('should load error when return promise reject', async () => {
+    const msg = 'new message'
+    const wrapper = shallowMount(HelloWorld, {
+      props: { msg }
+    })
+    mockAxios.get.mockRejectedValueOnce('error')
+    await wrapper.get('.loadUser').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.loading').exists()).toBe(false)
+    expect(wrapper.find('.error').exists()).toBe(true)
   })
 })
