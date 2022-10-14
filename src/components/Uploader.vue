@@ -30,12 +30,13 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref, computed } from 'vue'
+import { defineComponent, reactive, ref, computed, PropType } from 'vue'
 import { DeleteOutlined, LoadingOutlined, FileOutlined } from '@ant-design/icons-vue'
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 import { last } from 'lodash-es'
 type UploadStaus = 'ready' | 'loading' | 'success' | 'error'
+type CheckUpload = (file: File) => boolean | Promise<File>
 export interface UploadFile {
   uid: string;
   size: number;
@@ -54,6 +55,9 @@ export default defineComponent({
     action: {
       type: String,
       required: true
+    },
+    beforeUpload: {
+      type: Function as PropType<CheckUpload>
     }
   },
   setup(props) {
@@ -81,36 +85,56 @@ export default defineComponent({
         fileInput.value.click()
       }
     }
+    const postFile = (uploadedFile: File) => {
+      const formData = new FormData()
+      formData.append(uploadedFile.name, uploadedFile)
+      const fileObj = reactive<UploadFile>({
+        uid: uuidv4(),
+        size: uploadedFile.size,
+        name: uploadedFile.name,
+        status: 'loading',
+        raw: uploadedFile
+      })
+      uploadedFiles.value.push(fileObj)
+      axios.post(props.action, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((resp: any) => {
+        console.log(resp.data)
+        fileObj.status = 'success'
+        fileObj.resp = resp.data
+      }).catch(() => {
+        fileObj.status = 'error'
+      }).finally(() => {
+        if (fileInput.value) {
+          fileInput.value.value = ''
+        }
+      })
+    }
     const handleFileChange = (e: Event) => {
       const target = e.target as HTMLInputElement
       const files = target.files
       if (files) {
         const uploadedFile = files[0]
-        const formData = new FormData()
-        formData.append(uploadedFile.name, uploadedFile)
-        const fileObj = reactive<UploadFile>({
-          uid: uuidv4(),
-          size: uploadedFile.size,
-          name: uploadedFile.name,
-          status: 'loading',
-          raw: uploadedFile
-        })
-        uploadedFiles.value.push(fileObj)
-        axios.post(props.action, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
+        if (props.beforeUpload) {
+          const result = props.beforeUpload(uploadedFile)
+          if (result && result instanceof Promise) {
+            result.then(processedFile => {
+              if (processedFile instanceof File) {
+                postFile(processedFile)
+              } else {
+                throw new Error('beforeUpload Promise should return File object')
+              }
+            }).catch(e => {
+              console.error(e)
+            })
+          } else if (result === true) {
+            postFile(uploadedFile)
           }
-        }).then((resp: any) => {
-          console.log(resp.data)
-          fileObj.status = 'success'
-          fileObj.resp = resp.data
-        }).catch(() => {
-          fileObj.status = 'error'
-        }).finally(() => {
-          if (fileInput.value) {
-            fileInput.value.value = ''
-          }
-        })
+        } else {
+          postFile(uploadedFile)
+        }
       }
     }
     return {
