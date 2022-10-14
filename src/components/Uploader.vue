@@ -1,9 +1,16 @@
 <template>
   <div class="file-upload">
-    <button @click="triggerUpload" :disabled="isUploading">
-      <span v-if="isUploading">正在上传</span>
-      <span v-else>点击上传</span>   
-    </button>
+    <div class="upload-area" @click="triggerUpload">
+      <slot v-if="isUploading" name="loading">
+        <button disabled>正在上传</button>
+      </slot>
+      <slot name="uploaded" v-else-if="lastFileData && lastFileData.loaded" :uploadedData="lastFileData.data">
+        <button>点击上传</button>
+      </slot>
+      <slot v-else name="default">
+        <button>点击上传</button>
+      </slot> 
+    </div>
     <input
       ref="fileInput"
       type="file"
@@ -27,6 +34,7 @@ import { defineComponent, reactive, ref, computed } from 'vue'
 import { DeleteOutlined, LoadingOutlined, FileOutlined } from '@ant-design/icons-vue'
 import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
+import { last } from 'lodash-es'
 type UploadStaus = 'ready' | 'loading' | 'success' | 'error'
 export interface UploadFile {
   uid: string;
@@ -34,6 +42,7 @@ export interface UploadFile {
   name: string;
   status: UploadStaus;
   raw: File;
+  resp?: any;
 }
 export default defineComponent({
   components: {
@@ -52,6 +61,16 @@ export default defineComponent({
     const uploadedFiles = ref<UploadFile[]>([])
     const isUploading = computed(() => {
       return uploadedFiles.value.some(file => file.status === 'loading')
+    })
+    const lastFileData = computed(() => {
+      const lastFile = last(uploadedFiles.value)
+      if (lastFile) {
+        return {
+          loaded: lastFile.status === 'success',
+          data: lastFile.resp
+        }
+      }
+      return false
     })
     const removeFile = (id: string) => {
       uploadedFiles.value = uploadedFiles.value.filter(file => file.uid !== id)
@@ -84,6 +103,7 @@ export default defineComponent({
         }).then((resp: any) => {
           console.log(resp.data)
           fileObj.status = 'success'
+          fileObj.resp = resp.data
         }).catch(() => {
           fileObj.status = 'error'
         }).finally(() => {
@@ -99,7 +119,8 @@ export default defineComponent({
       handleFileChange,
       isUploading,
       uploadedFiles,
-      removeFile
+      removeFile,
+      lastFileData
     }
   }
 })
