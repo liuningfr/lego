@@ -1,4 +1,4 @@
-import { shallowMount, VueWrapper } from '@vue/test-utils'
+import { shallowMount, VueWrapper, mount } from '@vue/test-utils'
 import Uploader from '@/components/Uploader.vue'
 import axios from 'axios'
 import flushPromises from 'flush-promises'
@@ -14,6 +14,13 @@ const mockComponents = {
   'LoadingOutlined': mockComponent,
   'FileOutlined': mockComponent,
 }
+const setInputValue = (input: HTMLInputElement) => {
+  const files = [testFile] as any
+  Object.defineProperty(input, 'files', {
+    value: files,
+    writable: false
+  })
+};
 describe('Uploader Component', () => {
   beforeAll(() => {
     wrapper = shallowMount(Uploader, {
@@ -35,11 +42,12 @@ describe('Uploader Component', () => {
     // create a file
     mockedAxios.post.mockResolvedValueOnce({ status: 'success' })
     const fileInput = wrapper.get('input').element as HTMLInputElement
-    const files = [testFile] as any
-    Object.defineProperty(fileInput, 'files', {
-      value: files,
-      writable: false
-    })
+    // const files = [testFile] as any
+    // Object.defineProperty(fileInput, 'files', {
+    //   value: files,
+    //   writable: false
+    // })
+    setInputValue(fileInput)
     await wrapper.get('input').trigger('change')
     expect(mockedAxios.post).toHaveBeenCalledTimes(1)
     // ssexpect(wrapper.get('button span').text()).toBe('正在上传')
@@ -70,5 +78,30 @@ describe('Uploader Component', () => {
     // 点击列表中右侧的 button，可以删除这一项
     await lastItem.get('.delete-icon').trigger('click')
     expect(wrapper.findAll('li').length).toBe(1)
+  })
+  it.only('should show the correct interface when using custom slot', async () => { 
+    mockedAxios.post.mockResolvedValueOnce({ data: {url: 'dummy.url'}})
+    const wrapper = mount(Uploader, {
+      props: {
+        action: 'test.url',
+      },
+      slots: {
+        default: '<button>Custom button</button>',
+        loading: '<div class="loading">custom loading</div>',
+        uploaded: `<template #uploaded="{ uploadedData }">
+          <div class="custom-loaded">{{uploadedData.url}}</div>
+        </template>`
+      },
+      global: {
+        stubs: mockComponents
+      }
+    })
+    expect(wrapper.get('button').text()).toBe('Custom button')
+    const fileInput = wrapper.get('input').element as HTMLInputElement
+    setInputValue(fileInput)
+    await wrapper.get('input').trigger('change')
+    expect(wrapper.get('.loading').text()).toBe('custom loading')
+    await flushPromises()
+    expect(wrapper.get('.custom-loaded').text()).toBe('dummy.url')
   })
 })
