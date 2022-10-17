@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <uploader action="http://local.test:7001/api/upload/" drag>
+    <uploader action="http://local.test:7001/api/upload/" drag :autoUpload="false" ref="uploader">
     <div class="uploader-container">
       <h4>上传图片</h4>
     </div>
@@ -16,20 +16,56 @@
       </div>
     </template>
     </uploader>
-    <router-view />
+    <button @click="callUpload">手动上传</button>
+    <router-view/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref, getCurrentInstance } from 'vue'
+import axios from 'axios'
 import Uploader from './components/Uploader.vue'
-
 export default defineComponent({
   name: 'App',
   components: {
     Uploader
   },
-});
+  data() {
+    return {
+      test: 0
+    }
+  },
+  setup() {
+    const uploader = ref()
+    const internal = getCurrentInstance()
+    console.log('internal instance', internal)
+    const callUpload = () => {
+      uploader.value.uploadFiles()
+    }
+    console.log('inner component instance', uploader)
+    const handleFileChange = (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const files = target.files
+      if (files) {
+        const uploadedFile = files[0]
+        const formData = new FormData()
+        formData.append(uploadedFile.name, uploadedFile)
+        axios.post("http://local.test:7001/api/upload", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }).then((resp: any) => {
+          console.log(resp.data)
+        })
+      }
+    }
+    return {
+      handleFileChange,
+      uploader,
+      callUpload
+    }
+  }
+})
 </script>
 
 <style lang="scss">

@@ -14,8 +14,8 @@ const mockComponents = {
   'LoadingOutlined': mockComponent,
   'FileOutlined': mockComponent,
 }
-const setInputValue = (input: HTMLInputElement) => {
-  const files = [testFile] as any
+const setInputValue = (input: HTMLInputElement, file = testFile) => {
+  const files = [file] as any
   Object.defineProperty(input, 'files', {
     value: files,
     writable: false
@@ -187,6 +187,26 @@ describe('Uploader Component', () => {
     expect(mockedAxios.post).toHaveBeenCalled()
     await flushPromises()
     expect(wrapper.findAll('li').length).toBe(1)
+  })
+  it('testing manual upload process', async () => {
+    mockedAxios.post.mockResolvedValueOnce({ data: {url: 'dummy.url'}})
+    const wrapper = shallowMount(Uploader, {
+      props: {
+        action: 'test.url',
+        drag: true,
+        autoUpload: false
+      },
+    })
+    const fileInput = wrapper.get('input').element as HTMLInputElement
+    setInputValue(fileInput)
+    await wrapper.get('input').trigger('change')
+    expect(wrapper.findAll('li').length).toBe(1)
+    const firstItem = wrapper.get('li:first-child')
+    expect(firstItem.classes()).toContain('upload-ready')
+    wrapper.vm.uploadFiles()
+    expect(mockedAxios.post).toHaveBeenCalled()
+    await flushPromises()
+    expect(firstItem.classes()).toContain('upload-success')
   })
   afterEach(() => {
     mockedAxios.post.mockReset()

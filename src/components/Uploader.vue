@@ -22,7 +22,7 @@
     >
     <ul class="upload-list">
       <li :class="`uploaded-file upload-${file.status}`"
-        v-for="file in uploadedFiles" 
+        v-for="file in filesList" 
         :key="file.uid">
         <span v-if="file.status === 'loading'" class="file-icon"><LoadingOutlined/></span>
         <span v-else class="file-icon"><FileOutlined/></span>
@@ -65,17 +65,21 @@ export default defineComponent({
     drag: {
       type: Boolean,
       default: false
+    },
+    autoUpload: {
+      type: Boolean,
+      default: true
     }
   },
   setup(props) {
     const fileInput = ref<null | HTMLInputElement>(null)
-    const uploadedFiles = ref<UploadFile[]>([])
+    const filesList = ref<UploadFile[]>([])
     const isDragOver = ref(false)
     const isUploading = computed(() => {
-      return uploadedFiles.value.some(file => file.status === 'loading')
+      return filesList.value.some(file => file.status === 'loading')
     })
     const lastFileData = computed(() => {
-      const lastFile = last(uploadedFiles.value)
+      const lastFile = last(filesList.value)
       if (lastFile) {
         return {
           loaded: lastFile.status === 'success',
@@ -85,7 +89,7 @@ export default defineComponent({
       return false
     })
     const removeFile = (id: string) => {
-      uploadedFiles.value = uploadedFiles.value.filter(file => file.uid !== id)
+      filesList.value = filesList.value.filter(file => file.uid !== id)
     }
 
     const triggerUpload = () => {
@@ -93,35 +97,40 @@ export default defineComponent({
         fileInput.value.click()
       }
     }
-
-    const postFile = (uploadedFile: File) => {
+    const postFile = (readyFile: UploadFile) => {
       const formData = new FormData()
-      formData.append(uploadedFile.name, uploadedFile)
-      const fileObj = reactive<UploadFile>({
-        uid: uuidv4(),
-        size: uploadedFile.size,
-        name: uploadedFile.name,
-        status: 'loading',
-        raw: uploadedFile
-      })
-      uploadedFiles.value.push(fileObj)
+      formData.append(readyFile.name, readyFile.raw)
+      readyFile.status = 'loading'
       axios.post(props.action, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       }).then((resp: any) => {
-        console.log(resp.data)
-        fileObj.status = 'success'
-        fileObj.resp = resp.data
+        readyFile.status = 'success'
+        readyFile.resp = resp.data
       }).catch(() => {
-        fileObj.status = 'error'
+        readyFile.status = 'error'
       }).finally(() => {
         if (fileInput.value) {
           fileInput.value.value = ''
         }
       })
     }
-    const uploadFiles = (files: null | FileList) => {
+    // addFileToList
+    const addFileToList = (uploadedFile: File) => {
+      const fileObj = reactive<UploadFile>({
+        uid: uuidv4(),
+        size: uploadedFile.size,
+        name: uploadedFile.name,
+        status: 'ready',
+        raw: uploadedFile
+      })
+      filesList.value.push(fileObj)
+      if (props.autoUpload) {
+        postFile(fileObj)
+      }
+    }
+    const beforeUploadCheck = (files: null | FileList) => {
       if (files) {
         const uploadedFile = files[0]
         if (props.beforeUpload) {
@@ -129,7 +138,7 @@ export default defineComponent({
           if (result && result instanceof Promise) {
             result.then(processedFile => {
               if (processedFile instanceof File) {
-                postFile(processedFile)
+                addFileToList(processedFile)
               } else {
                 throw new Error('beforeUpload Promise should return File object')
               }
@@ -137,19 +146,23 @@ export default defineComponent({
               console.error(e)
             })
           } else if (result === true) {
-            postFile(uploadedFile)
+            addFileToList(uploadedFile)
           }
         } else {
-          postFile(uploadedFile)
+          addFileToList(uploadedFile)
         }
-      }
+      }      
     }
+    const uploadFiles = () => {
+      filesList.value.filter(file => file.status === 'ready').forEach(readyFile => postFile(readyFile))
+    }
+
     let events: { [key: string]: (e: any) => void } = {
       'click': triggerUpload
     }
     const handleFileChange = (e: Event) => {
       const target = e.target as HTMLInputElement
-      uploadFiles(target.files)
+      beforeUploadCheck(target.files)
     }
     const handleDrag = (e: DragEvent, over: boolean) => {
       e.preventDefault()
@@ -159,7 +172,7 @@ export default defineComponent({
       e.preventDefault()
       isDragOver.value = false
       if (e.dataTransfer) {
-        uploadFiles(e.dataTransfer.files)
+        beforeUploadCheck(e.dataTransfer.files)
       }
     }
     if (props.drag) {
@@ -172,14 +185,14 @@ export default defineComponent({
     }
     return {
       fileInput,
-      triggerUpload,
       handleFileChange,
       isUploading,
-      uploadedFiles,
+      filesList,
       removeFile,
       lastFileData,
       isDragOver,
-      events
+      events,
+      uploadFiles
     }
   }
 })
