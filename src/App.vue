@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <uploader action="http://local.test:7001/api/upload/">
+    <uploader action="http://local.test:7001/api/upload/" drag>
     <div class="uploader-container">
       <h4>上传图片</h4>
     </div>
@@ -32,16 +32,28 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style lang="scss">
 .page-title {
   color: #fff;
 }
-.content-container {
-  background: #fff;
-  padding: 0 24px 24px 30px;
-  min-height: 85vh;
-  max-width: 1200px;
-  margin: 50px auto;
-  width: 100%;
+.file-upload .upload-area {
+  background: #efefef;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 20px;
+  width: 360px;
+  height: 180px;
+  text-align: center;
+  &:hover {
+    border: 1px dashed #1890ff;
+  }
+  &.is-dragover {
+    border: 2px dashed #1890ff;
+    background: rgba(#1890ff, .2);
+  }
+}
+.uploaded-area img {
+  height: 100px;
 }
 </style>
