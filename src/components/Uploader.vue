@@ -20,10 +20,16 @@
       :style="{display: 'none'}"
       @change="handleFileChange"
     >
-    <ul class="upload-list">
+    <ul :class="`upload-list upload-list-${listType}`">
       <li :class="`uploaded-file upload-${file.status}`"
         v-for="file in filesList" 
         :key="file.uid">
+        <img
+          v-if="file.url && listType === 'picture'"
+          class="upload-list-thumbnail"
+          :src="file.url"
+          :alt="file.name"
+        >
         <span v-if="file.status === 'loading'" class="file-icon"><LoadingOutlined/></span>
         <span v-else class="file-icon"><FileOutlined/></span>
         <span class="filename">{{file.name}}</span>
@@ -40,6 +46,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { last } from 'lodash-es'
 type UploadStaus = 'ready' | 'loading' | 'success' | 'error'
 type CheckUpload = (file: File) => boolean | Promise<File>
+  type FileListType = 'picture' | 'text'
 export interface UploadFile {
   uid: string;
   size: number;
@@ -47,6 +54,7 @@ export interface UploadFile {
   status: UploadStaus;
   raw: File;
   resp?: any;
+  url?: string;
 }
 export default defineComponent({
   components: {
@@ -69,6 +77,10 @@ export default defineComponent({
     autoUpload: {
       type: Boolean,
       default: true
+    },
+    listType: {
+      type: String as PropType<FileListType>,
+      default: 'text'
     }
   },
   setup(props) {
@@ -125,6 +137,19 @@ export default defineComponent({
         status: 'ready',
         raw: uploadedFile
       })
+      if (props.listType === 'picture') {
+        try {
+          fileObj.url = URL.createObjectURL(uploadedFile)
+        } catch (err) {
+          console.error('upload File error', err)
+        }
+        // FileReader to preview local image
+        // const fileReader = new FileReader()
+        // fileReader.readAsDataURL(uploadedFile)
+        // fileReader.addEventListener('load', () => {
+        //   fileObj.url = fileReader.result as string
+        // })
+      }
       filesList.value.push(fileObj)
       if (props.autoUpload) {
         postFile(fileObj)
@@ -214,6 +239,16 @@ export default defineComponent({
   position: relative;
   &:first-child {
     margin-top: 10px;
+  }
+  .upload-list-thumbnail {
+    vertical-align: middle;
+    display: inline-block;
+    width: 70px;
+    height: 70px;
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
+    object-fit: cover;
   }
   .file-icon {
     svg {

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <uploader action="http://local.test:7001/api/upload/" drag :autoUpload="false" ref="uploader">
+    <uploader action="http://local.test:7001/api/upload/" drag listType="picture" ref="uploader">
     <div class="uploader-container">
       <h4>上传图片</h4>
     </div>
