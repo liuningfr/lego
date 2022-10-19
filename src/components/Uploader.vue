@@ -20,7 +20,7 @@
       :style="{display: 'none'}"
       @change="handleFileChange"
     >
-    <ul :class="`upload-list upload-list-${listType}`">
+    <ul :class="`upload-list upload-list-${listType}`" v-if="showUploadList">
       <li :class="`uploaded-file upload-${file.status}`"
         v-for="file in filesList" 
         :key="file.uid">
@@ -45,8 +45,8 @@ import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 import { last } from 'lodash-es'
 type UploadStaus = 'ready' | 'loading' | 'success' | 'error'
+type FileListType = 'picture' | 'text' 
 type CheckUpload = (file: File) => boolean | Promise<File>
-  type FileListType = 'picture' | 'text'
 export interface UploadFile {
   uid: string;
   size: number;
@@ -80,10 +80,15 @@ export default defineComponent({
     },
     listType: {
       type: String as PropType<FileListType>,
-      default: 'text'
+      defualt: 'text'
+    },
+    showUploadList: {
+      type: Boolean,
+      default: true
     }
   },
-  setup(props) {
+  emits: ['success', 'error', 'change'],
+  setup(props, { emit }) {
     const fileInput = ref<null | HTMLInputElement>(null)
     const filesList = ref<UploadFile[]>([])
     const isDragOver = ref(false)
@@ -120,8 +125,10 @@ export default defineComponent({
       }).then((resp: any) => {
         readyFile.status = 'success'
         readyFile.resp = resp.data
-      }).catch(() => {
+        emit('success', { resp: resp.data, file: readyFile, list: filesList.value })
+      }).catch((e: any) => {
         readyFile.status = 'error'
+        emit('error', { error:e, file: readyFile, list: filesList.value })
       }).finally(() => {
         if (fileInput.value) {
           fileInput.value.value = ''

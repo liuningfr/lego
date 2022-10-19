@@ -4,38 +4,42 @@
       <l-text v-bind="item"></l-text>
     </div>
   </div>
+  <StyledUploader @success="onImageUploaded"></StyledUploader>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import LText from '../components/LText.vue'
+import StyledUploader from '../components/StyledUploader.vue'
 export default defineComponent({
   props: {
     list: {
-      type: Array as PropType<any>,
+      type: Array,
       required: true
     }
   },
   emits: ['on-item-click'],
   name: 'components-list',
   components: {
-    LText
+    LText,
+    StyledUploader
   },
   setup(props, context) {
     const onItemClick = (data: any) => {
       context.emit('on-item-click', data)
     }
+    const onImageUploaded = (data: any) => {
+      console.log(data)
+    }
     return {
-      onItemClick
+      onItemClick,
+      onImageUploaded
     }
   }
 })
 </script>
 
 <style>
-/* .create-component-list {
-  margin: 0 auto;
-} */
 .component-item {
   width: 100px;
   margin: 0 auto;
