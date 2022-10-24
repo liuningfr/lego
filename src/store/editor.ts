@@ -1,7 +1,7 @@
 import { Module } from 'vuex'
 import { v4 as uuidv4 } from 'uuid'
 import { GlobalDataProps } from './index'
-import { TextComponentProps } from '../defaultProps'
+import { TextComponentProps, ImageComponentProps } from '../defaultProps'
 export interface EditorProps {
   // 供中间编辑器渲染的数组
   components: ComponentData[];
@@ -11,17 +11,16 @@ export interface EditorProps {
 }
 export interface ComponentData {
   // 这个元素的 属性，属性请详见下面
-  props: Partial<TextComponentProps>;
+  props: Partial<TextComponentProps & ImageComponentProps>;
   // id，uuid v4 生成
   id: string;
   // 业务组件库名称 l-text，l-image 等等 
-  name: string;
+  name: 'l-text' | 'l-image';
 }
-
 export const testComponents: ComponentData[] = [
-  { id: uuidv4(), name: 'l-text', props: { text: 'hello', fontSize: '10px', color: '#000000', 'lineHeight': '1', textAlign: 'left', fontFamily: '' }},
-  { id: uuidv4(), name: 'l-text', props: { text: 'hello2', fontSize: '20px', color: 'red', 'lineHeight': '2', textAlign: 'left', fontFamily: '' }},
-  { id: uuidv4(), name: 'l-text', props: { text: 'hello3', fontSize: '30px', fontWeight: 'bold', actionType: 'url', url: 'https://www.baidu.com', 'lineHeight': '3', textAlign: 'left', fontFamily: '' }}
+  { id: uuidv4(), name: 'l-text', props: { text: 'hello', fontSize: '20px', color: '#000000', 'lineHeight': '1', textAlign: 'left', fontFamily: '' }},
+  { id: uuidv4(), name: 'l-text', props: { text: 'hello2', fontSize: '10px', fontWeight: 'bold', 'lineHeight': '2', textAlign: 'left', fontFamily: '' }},
+  { id: uuidv4(), name: 'l-text', props: { text: 'hello3', fontSize: '15px', actionType: 'url', url: 'https://www.baidu.com', 'lineHeight': '3', textAlign: 'left', fontFamily: '' }}
 ]
 
 const editor: Module<EditorProps, GlobalDataProps> = {
@@ -30,13 +29,8 @@ const editor: Module<EditorProps, GlobalDataProps> = {
     currentElement: ''
   },
   mutations: {
-    addComponent(state, props: Partial<TextComponentProps>) {
-      const newComponent: ComponentData = {
-        id: uuidv4(),
-        name: 'l-text',
-        props
-      }
-      state.components.push(newComponent)
+    addComponent(state, component: ComponentData) {
+      state.components.push(component)
     },
     setActive(state, currentId: string) {
       state.currentElement = currentId
@@ -46,7 +40,7 @@ const editor: Module<EditorProps, GlobalDataProps> = {
       if (updatedComponent) {
         updatedComponent.props[key as keyof TextComponentProps] = value
       }
-    },
+    }
   },
   getters: {
     getCurrentElement: (state) => {

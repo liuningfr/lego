@@ -1,5 +1,5 @@
 <template>
-  <div class="editor" id="editor-layout-main">
+  <div class="editor-container">
     <a-layout>
       <a-layout-sider width="300" style="background: #fff">
         <div class="sidebar-container">
@@ -11,7 +11,7 @@
         <a-layout-content class="preview-container">
           <p>画布区域</p>
           <div class="preview-list" id="canvas-area">
-            <edit-wrapper
+            <edit-wrapper 
               @setActive="setActive"
               v-for="component in components"
               :key="component.id"
@@ -33,9 +33,12 @@
           :props="currentElement.props"
           @change="handleChange"
         ></props-table>
+        <pre>
+          {{currentElement && currentElement.props}}
+        </pre>
       </a-layout-sider>  
     </a-layout>
-  </div>  
+  </div>
   </template>
   
   <script lang="ts">
@@ -43,50 +46,48 @@
   import { useStore } from 'vuex'
   import { GlobalDataProps } from '../store/index'
   import LText from '../components/LText.vue'
-  import ComponentsList from '@/components/ComponentsList.vue'
-  import { defaultTextTemplates } from '@/defaultTemplates'
+  import LImage from '../components/LImage.vue'
+  import ComponentsList from '../components/ComponentsList.vue'
   import EditWrapper from '../components/EditWrapper.vue'
-  import { ComponentData } from '../store/editor'
   import PropsTable from '../components/PropsTable.vue'
-  
+  import { ComponentData } from '../store/editor'
+  import { defaultTextTemplates } from '../defaultTemplates'
   export default defineComponent({
     components: {
       LText,
+      LImage,
       ComponentsList,
       EditWrapper,
-      PropsTable,
+      PropsTable
     },
     setup() {
       const store = useStore<GlobalDataProps>()
       const components = computed(() => store.state.editor.components)
       const currentElement = computed<ComponentData | null>(() => store.getters.getCurrentElement)
-
-      const addItem = (props: any) => {
-        store.commit('addComponent', props)
+      const addItem = (component: any) => {
+        store.commit('addComponent', component)
       }
-
       const setActive = (id: string) => {
         store.commit('setActive', id)
       }
-
       const handleChange = (e: any) => {
+        console.log('event', e)
         store.commit('updateComponent', e)
       } 
-
       return {
         components,
         defaultTextTemplates,
-        currentElement,
         addItem,
         setActive,
-        handleChange,
+        currentElement,
+        handleChange
       }
     }
   })
   </script>
   
   <style>
-  .preview-container {
+  .editor-container .preview-container {
     padding: 24px;
     margin: 0;
     min-height: 85vh;
@@ -95,7 +96,7 @@
     align-items: center;
     position: relative;
   }
-  .preview-list {
+  .editor-container .preview-list {
     padding: 0;
     margin: 0;
     min-width: 375px;

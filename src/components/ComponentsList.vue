@@ -9,8 +9,13 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
+import { message } from 'ant-design-vue'
 import LText from '../components/LText.vue'
 import StyledUploader from '../components/StyledUploader.vue'
+import { ComponentData } from '../store/editor'
+import { imageDefaultProps, TextComponentProps } from '../defaultProps'
+import { UploadResp } from '../extraType'
 export default defineComponent({
   props: {
     list: {
@@ -25,11 +30,25 @@ export default defineComponent({
     StyledUploader
   },
   setup(props, context) {
-    const onItemClick = (data: any) => {
-      context.emit('on-item-click', data)
+    const onItemClick = (props: TextComponentProps) => {
+      const componentData: ComponentData = {
+        name: 'l-text',
+        id: uuidv4(),
+        props
+      }
+      context.emit('on-item-click', componentData)
     }
-    const onImageUploaded = (data: any) => {
-      console.log(data)
+    const onImageUploaded = (resp: UploadResp) => {
+      const componentData: ComponentData = {
+        name: 'l-image',
+        id: uuidv4(),
+        props: {
+          ...imageDefaultProps
+        }
+      }
+      message.success('上传成功')
+      componentData.props.src = resp.data.url
+      context.emit('on-item-click', componentData)
     }
     return {
       onItemClick,
