@@ -4,7 +4,7 @@
     action="http://local.test:7001/api/upload/" 
     :showUploadList="false"
     :beforeUpload="commonUploadCheck"
-    @success="(data) => {handleUploadSuccess(data.resp)}"
+    @success="(data) => {handleUploadSuccess(data.resp, data.file.raw)}"
   >
     <div class="uploader-container">
       <FileImageOutlined />
@@ -38,8 +38,8 @@ export default defineComponent({
   },
   emits: ['success'],
   setup(props, { emit }) {
-    const handleUploadSuccess = (resp: any) => {
-      emit('success', resp)
+    const handleUploadSuccess = (resp: any, file: File) => {
+      emit('success', { resp, file })
     }
     return {
       commonUploadCheck,

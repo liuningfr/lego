@@ -1,4 +1,4 @@
-import { VNode } from 'vue'
+import { VNode, h } from 'vue'
 import { TextComponentProps } from './defaultProps'
 export interface PropToForm {
   component: string;
@@ -11,24 +11,27 @@ export interface PropToForm {
   valueProp?: string;
   eventName?: string;
 }
+
 export type PropsToForms = {
   [P in keyof TextComponentProps]?: PropToForm
 }
-
 const fontFamilyArr = [
   { text: '宋体', value: '"SimSun","STSong"' },
   { text: '黑体', value: '"SimHei","STHeiti"' },
   { text: '楷体', value: '"KaiTi","STKaiti"' },
   { text: '仿宋', value: '"FangSong","STFangsong"' },
-];
-
+]
 const fontFamilyOptions = fontFamilyArr.map(font => {
   return {
     value: font.value,
     text: <span style={{ fontFamily: font.value}}>{font.text}</span> as VNode
   }
-});
-
+})
+const pxToNumberHandler: PropToForm = {
+  component: 'a-input-number',
+  initalTransform: (v: string) => parseInt(v),
+  afterTransform: (e: number) => e ? `${e}px` : '',
+}
 export const mapPropsToForms: PropsToForms = {
   text: {
     text: '文本',
@@ -38,9 +41,7 @@ export const mapPropsToForms: PropsToForms = {
   },
   fontSize: {
     text: '字号',
-    component: 'a-input-number',
-    initalTransform: (v: string) => parseInt(v),
-    afterTransform: (e: number) => e ? `${e}px` : '',
+    ...pxToNumberHandler
   },
   lineHeight: {
     text: '行高',
@@ -66,8 +67,12 @@ export const mapPropsToForms: PropsToForms = {
     text: '字体',
     options: [
       { value: '', text: '无' },
-      ...fontFamilyOptions,
+      ...fontFamilyOptions
     ]
+  },
+  width: {
+    text: '宽度',
+    ...pxToNumberHandler
   },
   color: {
     component: 'color-picker',
